@@ -27,7 +27,7 @@ DATASETS['Wine'] = {'data': [X, y], 'extra': {}}
 # Load other datasets
 DATASET_PATHS = {
     # 'Flare-F': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat',
-    'Yeast5': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat',
+    # 'Yeast5': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat',
     # 'CarvGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
     # 'CarGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
     'Seed': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seeds_dataset.txt',
@@ -81,7 +81,7 @@ def main():
         X, y = dataset['data']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        print("Before OverSampling:", np.bincount(y_train.astype(int)))
+        print("Before OverSampling:", np.bincount(y_train))
         X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
         print("After OverSampling:", np.bincount(y_train_SMOTE))
         
@@ -105,8 +105,8 @@ def main():
         
         output_path = os.path.join(output_dir, f"{dataset_name}_results.txt")
         with open(output_path, "w") as f:
-            for model, (test_acc, train_acc, f1_score,ap_score,gmean_score) in metrics.items():
-                result = f"{model} - Test Acc: {np.mean(test_acc)}, F1: {np.mean(f1_score)}, AP: {np.mean(ap_score)}, GMEAN: {np.mean(gmean_score)}\n"
+            for model, (test_acc, train_acc, f1_score,ap_score,gmean_score,auc_score) in metrics.items():
+                result = f"{model} - Test Acc: {np.mean(test_acc)}, AUC: {np.mean(auc_score)}, F1: {np.mean(f1_score)}, AP: {np.mean(ap_score)}, GMEAN: {np.mean(gmean_score)}\n"
                 print(result)
                 f.write(result)
 
