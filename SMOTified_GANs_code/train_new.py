@@ -14,7 +14,7 @@ from choose_device import get_default_device, to_device
 from fit import f1
 from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
 from sklearn.datasets import load_wine
-from real_data_generator import get_real_data_for_GAN  # Import the function
+# from real_data_generator import get_real_data_for_GAN  # Import the function
 import os
 
 # Define datasets
