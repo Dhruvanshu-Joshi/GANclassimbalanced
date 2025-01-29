@@ -26,22 +26,22 @@ DATASETS['Wine'] = {'data': [X, y], 'extra': {}}
 
 # Load other datasets
 DATASET_PATHS = {
-    'Flare-F': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat',
+    # 'Flare-F': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat',
     'Yeast5': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat',
-    'CarvGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
-    'CarGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
+    # 'CarvGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
+    # 'CarGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
     'Seed': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seeds_dataset.txt',
     'Glass': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/glass.csv',
-    'ILPD': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/Indian Liver Patient Dataset (ILPD).csv',
-    'Yeast5-ERL': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.data',
+    # 'ILPD': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/Indian Liver Patient Dataset (ILPD).csv',
+    # 'Yeast5-ERL': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.data',
     'HIGGS': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/higgs.csv',
-    'kdd_cup_new': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/kdd_cup_new.csv',
+    # 'kdd_cup_new': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/kdd_cup_new.csv',
     'Epileptic Seizure Recognition': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seizure.csv',
     'Breast Cancer Wisconsin': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/breast_cancer.csv',
-    'Diabetes': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/diabetes_data.csv',
+    # 'Diabetes': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/diabetes_data.csv',
     'Sonar': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/sonar_all_data.csv',
     'Student Dropout': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/student_dropout.csv',
-    'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
+    # 'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
 }
 
 for name, path in DATASET_PATHS.items():
@@ -97,16 +97,16 @@ def main():
         X_final_G, y_final_G = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)), y_train_SMOTE)
         
         metrics = {
-            "Normal": test_model_lists(X_train, y_train, X_test, y_test, 30),
-            "SMOTE": test_model_lists(X_train_SMOTE, y_train_SMOTE, X_test, y_test, 30),
-            "SG_GANs": test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 30),
-            "G_GANs": test_model_lists(X_final_G, y_final_G, X_test, y_test, 30)
+            # "Normal": test_model_lists(X_train, y_train, X_test, y_test, 20),
+            # "SMOTE": test_model_lists(X_train_SMOTE, y_train_SMOTE, X_test, y_test, 20),
+            "SG_GANs": test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 20),
+            "G_GANs": test_model_lists(X_final_G, y_final_G, X_test, y_test, 20)
         }
         
         output_path = os.path.join(output_dir, f"{dataset_name}_results.txt")
         with open(output_path, "w") as f:
-            for model, (test_acc, train_acc, f1_score) in metrics.items():
-                result = f"{model} - Test Acc: {np.mean(test_acc)}, Train Acc: {np.mean(train_acc)}, F1: {np.mean(f1_score)}\n"
+            for model, (test_acc, train_acc, f1_score,ap_score,gmean_score) in metrics.items():
+                result = f"{model} - Test Acc: {np.mean(test_acc)}, F1: {np.mean(f1_score)}, AP: {np.mean(ap_score)}, GMEAN: {np.mean(gmean_score)}\n"
                 print(result)
                 f.write(result)
 
