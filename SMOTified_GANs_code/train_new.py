@@ -17,52 +17,52 @@ from sklearn.datasets import load_wine
 # from real_data_generator import get_real_data_for_GAN  # Import the function
 import os
 
-# Define datasets
-DATASETS = dict()
+# # Define datasets
+# DATASETS = dict()
 
-# Load Wine Dataset
-X, y = load_wine(return_X_y=True)
-DATASETS['Wine'] = {'data': [X, y], 'extra': {}}
+# # Load Wine Dataset
+# X, y = load_wine(return_X_y=True)
+# DATASETS['Wine'] = {'data': [X, y], 'extra': {}}
 
-# Load other datasets
-DATASET_PATHS = {
-    # 'Flare-F': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat',
-    # 'Yeast5': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat',
-    # 'CarvGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
-    # 'CarGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
-    'Seed': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seeds_dataset.txt',
-    'Glass': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/glass.csv',
-    # 'ILPD': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/Indian Liver Patient Dataset (ILPD).csv',
-    # 'Yeast5-ERL': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.data',
-    # 'HIGGS': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/higgs.csv',
-    # 'kdd_cup_new': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/kdd_cup_new.csv',
-    # 'Epileptic Seizure Recognition': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seizure.csv',
-    'Breast Cancer Wisconsin': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/breast_cancer.csv',
-    # 'Diabetes': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/diabetes_data.csv',
-    'Sonar': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/sonar_all_data.csv',
-    'Student Dropout': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/student_dropout.csv',
-    # 'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
-}
+# # Load other datasets
+# DATASET_PATHS = {
+#     # 'Flare-F': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat',
+#     # 'Yeast5': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat',
+#     # 'CarvGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
+#     # 'CarGood': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data',
+#     'Seed': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seeds_dataset.txt',
+#     'Glass': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/glass.csv',
+#     # 'ILPD': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/Indian Liver Patient Dataset (ILPD).csv',
+#     # 'Yeast5-ERL': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.data',
+#     # 'HIGGS': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/higgs.csv',
+#     # 'kdd_cup_new': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/kdd_cup_new.csv',
+#     # 'Epileptic Seizure Recognition': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/seizure.csv',
+#     'Breast Cancer Wisconsin': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/breast_cancer.csv',
+#     # 'Diabetes': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/diabetes_data.csv',
+#     'Sonar': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/sonar_all_data.csv',
+#     'Student Dropout': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/student_dropout.csv',
+#     # 'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
+# }
 
-for name, path in DATASET_PATHS.items():
-    try:
-        if path.endswith('.csv'):
-            data = pd.read_csv(path, header=None)
-        elif path.endswith('.xls'):
-            data = pd.read_excel(path, header=0)
-        else:
-            data = pd.read_csv(path, delimiter='\t', header=None)
+# for name, path in DATASET_PATHS.items():
+#     try:
+#         if path.endswith('.csv'):
+#             data = pd.read_csv(path, header=None)
+#         elif path.endswith('.xls'):
+#             data = pd.read_excel(path, header=0)
+#         else:
+#             data = pd.read_csv(path, delimiter='\t', header=None)
 
-        # Encode categorical features
-        objects = data.select_dtypes(include=['object'])
-        for col in objects.columns:
-            if col != data.shape[1] - 1:
-                data.iloc[:, col] = LabelEncoder().fit_transform(data.iloc[:, col])
+#         # Encode categorical features
+#         objects = data.select_dtypes(include=['object'])
+#         for col in objects.columns:
+#             if col != data.shape[1] - 1:
+#                 data.iloc[:, col] = LabelEncoder().fit_transform(data.iloc[:, col])
 
-        X, y = data.iloc[:, :-1].values, data.iloc[:, -1].values
-        DATASETS[name] = {'data': [X, y], 'extra': {}}
-    except Exception as e:
-        print(f"Error loading {name}: {e}")
+#         X, y = data.iloc[:, :-1].values, data.iloc[:, -1].values
+#         DATASETS[name] = {'data': [X, y], 'extra': {}}
+#     except Exception as e:
+#         print(f"Error loading {name}: {e}")
 
 # Function to shuffle data
 def shuffle_in_unison(a, b):
