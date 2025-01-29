@@ -21,14 +21,14 @@ def shuffle_in_unison(a, b):
 def main():
     dataset_path = input("Enter the dataset path (.csv, .txt, .dat): ")
     dataset_path = "SMOTified_GANs_code/raw/breast_cancer.csv"
-    df = load_dataset(dataset_path)
+    X,y = load_dataset(dataset_path)
     
-    X = df.iloc[:, :-1].values  # Features (all columns except last)
-    y = df.iloc[:, -1].values   # Target (last column)
+    # X = df.iloc[:, :-1].values  # Features (all columns except last)
+    # y = df.iloc[:, -1].values   # Target (last column)
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    print("Before OverSampling:", np.bincount(y_train))
+    print("Before OverSampling:",np.bincount(y_train.astype(int)))
     X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
     print("After OverSampling:", np.bincount(y_train_SMOTE))
     

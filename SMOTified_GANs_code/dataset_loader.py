@@ -1,17 +1,40 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-def load_dataset(file_path, delimiter=','):
+
+def load_dataset(file_path):
     """
-    Load a dataset from a CSV, TXT, or DAT file.
-    Args:
-        file_path (str): Path to the dataset file.
-        delimiter (str): Delimiter used in the file (default: ',').
-    Returns:
-        pd.DataFrame: Loaded dataset.
+    Load dataset from CSV, TXT, or DAT formats.
+    Assumes the last column is the target variable.
     """
-    return pd.read_csv(file_path, delimiter=delimiter)
+    # Load data based on file extension
+    if file_path.endswith(".csv"):
+        df = pd.read_csv(file_path)
+    elif file_path.endswith(".txt") or file_path.endswith(".dat"):
+        df = pd.read_csv(file_path, delimiter="\t")  # Adjust delimiter if needed
+    else:
+        raise ValueError("Unsupported file format. Use .csv, .txt, or .dat")
+
+    # Ensure all columns except the last are numeric
+    for col in df.columns[:-1]:  # Iterate over feature columns
+        if df[col].dtype == 'object':
+            df[col] = LabelEncoder().fit_transform(df[col])  # Encode categorical columns
+
+    # Ensure target column is numeric
+    target_col = df.columns[-1]
+    if df[target_col].dtype == 'object':
+        df[target_col] = LabelEncoder().fit_transform(df[target_col])
+
+    # Convert all data to float
+    df = df.astype(float)
+
+    # Split features and labels
+    X = df.iloc[:, :-1].values  # Features (all columns except last)
+    y = df.iloc[:, -1].values   # Target (last column)
+
+    return X, y
 
 def get_features_labels(df, target_column, test_size=0.2):
     """
