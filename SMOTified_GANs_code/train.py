@@ -55,7 +55,7 @@ def main():
 
     dataset_url =  'https://raw.githubusercontent.com/sydney-machine-learning/GANclassimbalanced/main/DATASETS/abalone_csv.csv'
     download_url(dataset_url, '.')
-    Abalone_df  = pd.read_csv('D:/Projects/Internship UNSW/abalone_csv.csv')
+    Abalone_df  = pd.read_csv('SMOTified_GANs_code/abalone_csv.csv')
 
     #print(Abalone_df.Class_number_of_rings.size)
     option = int(input('Type the number of Abalone classes needed: '))
@@ -64,7 +64,7 @@ def main():
         Abalone_df = two_classes_Abalone(Abalone_df)
 
         label_encoder = LabelEncoder()
-        onehot_encoder = OneHotEncoder(sparse=False) 
+        onehot_encoder = OneHotEncoder(sparse_output=False) 
         Sex_labelencoded= label_encoder.fit_transform(Abalone_df['Sex']) 
         Sex_labelencoded = Sex_labelencoded.reshape(len(Sex_labelencoded), 1)
         Sex_onehotencoded = onehot_encoder.fit_transform(Sex_labelencoded)
@@ -162,7 +162,7 @@ def main():
         Abalone_df = four_classes_Abalone(Abalone_df)
 
         label_encoder = LabelEncoder()
-        onehot_encoder = OneHotEncoder(sparse=False) 
+        onehot_encoder = OneHotEncoder(sparse_output=False) 
         Sex_labelencoded= label_encoder.fit_transform(Abalone_df['Sex']) 
         Sex_labelencoded = Sex_labelencoded.reshape(len(Sex_labelencoded), 1)
         Sex_onehotencoded = onehot_encoder.fit_transform(Sex_labelencoded)

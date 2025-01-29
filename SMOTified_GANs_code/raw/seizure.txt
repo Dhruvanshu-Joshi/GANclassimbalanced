@@ -1,0 +1,1 @@
+Epileptic Seizure Recognition & Healthcare & UCI Machine Learning Repository & 178 & 2 & 11,500 & Seizure (2,300), Non-seizure (9,200) & Seizure & 2,300 & 9,300
