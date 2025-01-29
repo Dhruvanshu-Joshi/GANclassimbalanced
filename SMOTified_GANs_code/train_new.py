@@ -85,19 +85,16 @@ def main():
         X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
         print("After OverSampling:", np.bincount(y_train_SMOTE))
         
-        # Generate real data for GAN
-        X_real, y_real = get_real_data_for_GAN(X_train_SMOTE, y_train_SMOTE)
-        
-        X_oversampled = torch.tensor(X_real[len(X_train):], dtype=torch.float32).to(device)
+        X_oversampled = torch.tensor(X_train_SMOTE[len(X_train):], dtype=torch.float32).to(device)
         
         lr, epochs, batch_size = 0.0002, 150, 128
-        generator_SG, generator_G = f1(X_train, y_train, X_real, y_real, X_train, y_train, X_oversampled, device, lr, epochs, batch_size, 1, 0)
+        generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE, X_train, y_train, X_oversampled, device, lr, epochs, batch_size, 1, 0)
         
         X_trained_SG = generator_SG(X_oversampled).cpu().detach().numpy()
         X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()
         
-        X_final_SG, y_final_SG = shuffle_in_unison(np.vstack((X_real[:len(X_train)], X_trained_SG)), y_real)
-        X_final_G, y_final_G = shuffle_in_unison(np.vstack((X_real[:len(X_train)], X_trained_G)), y_real)
+        X_final_SG, y_final_SG = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_SG)), y_train_SMOTE)
+        X_final_G, y_final_G = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)), y_train_SMOTE)
         
         metrics = {
             "Normal": test_model_lists(X_train, y_train, X_test, y_test, 30),
@@ -109,7 +106,7 @@ def main():
         output_path = os.path.join(output_dir, f"{dataset_name}_results.txt")
         with open(output_path, "w") as f:
             for model, (test_acc, train_acc, f1_score) in metrics.items():
-                result = f"{model} - Test Acc: {test_acc}, Train Acc: {train_acc}, F1: {f1_score}\n"
+                result = f"{model} - Test Acc: {np.mean(test_acc)}, Train Acc: {np.mean(train_acc)}, F1: {np.mean(f1_score)}\n"
                 print(result)
                 f.write(result)
 
