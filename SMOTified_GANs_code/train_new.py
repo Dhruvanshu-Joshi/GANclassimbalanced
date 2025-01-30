@@ -18,7 +18,7 @@ from sklearn.datasets import load_wine
 import os
 
 # # Define datasets
-# DATASETS = dict()
+DATASETS = dict()
 
 # # Load Wine Dataset
 # X, y = load_wine(return_X_y=True)
@@ -64,6 +64,18 @@ import os
 #     except Exception as e:
 #         print(f"Error loading {name}: {e}")
 
+
+data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat', header=None)
+data.iloc[:, -1] = data.iloc[:, -1].map({'negative': 0, 'positive': 1})
+data.iloc[:, -1] = data.iloc[:, -1].astype(int)
+
+DATASETS.update({
+    'Yeast5': {
+        'data': [data.values[:, :-1], data.values[:, -1]],
+        'extra': {}
+    }
+})
+
 # Function to shuffle data
 def shuffle_in_unison(a, b):
     assert len(a) == len(b)
@@ -80,10 +92,11 @@ def main():
         print(f"Processing {dataset_name}...")
         X, y = dataset['data']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        print("Before OverSampling:", np.bincount(y_train))
+        y_train = y_train.astype(int)
+        y_test = y_test.astype(int)
+        # print("Before OverSampling:", np.bincount(y_train))
         X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
-        print("After OverSampling:", np.bincount(y_train_SMOTE))
+        # print("After OverSampling:", np.bincount(y_train_SMOTE))
         
         X_oversampled = torch.tensor(X_train_SMOTE[len(X_train):], dtype=torch.float32).to(device)
         
