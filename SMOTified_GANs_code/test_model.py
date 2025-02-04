@@ -72,4 +72,10 @@ def test_model_lists(X_train, y_train, X_test, y_test, no_of_trainings):
         ap_score_array.append(AP_score)
         gmean_array.append(G_mean)
         auc_array.append(AUC_score)
-    return test_accuracy_array, train_accuracy_array, f1_score_array, ap_score_array, gmean_array, auc_array
+    std_dev_acc = stdev(test_accuracy_array) if len(test_accuracy_array) > 1 else 0
+    std_dev_f1 = stdev(f1_score_array) if len(f1_score_array) > 1 else 0
+    std_dev_ap = stdev(ap_score_array) if len(ap_score_array) > 1 else 0
+    std_dev_gmean = stdev(gmean_array) if len(gmean_array) > 1 else 0
+    std_dev_auc = stdev(auc_array) if len(auc_array) > 1 else 0
+    
+    return test_accuracy_array, train_accuracy_array, f1_score_array, ap_score_array, gmean_array, auc_array,std_dev_acc, std_dev_f1,std_dev_ap,std_dev_gmean,std_dev_auc

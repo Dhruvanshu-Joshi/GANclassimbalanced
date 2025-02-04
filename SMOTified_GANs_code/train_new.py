@@ -16,6 +16,7 @@ from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
 from sklearn.datasets import load_wine
 # from real_data_generator import get_real_data_for_GAN  # Import the function
 import os
+import time
 
 # # Define datasets
 DATASETS = dict()
@@ -44,31 +45,10 @@ DATASETS = dict()
 #     # 'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
 # }
 
-# for name, path in DATASET_PATHS.items():
-#     try:
-#         if path.endswith('.csv'):
-#             data = pd.read_csv(path, header=None)
-#         elif path.endswith('.xls'):
-#             data = pd.read_excel(path, header=0)
-#         else:
-#             data = pd.read_csv(path, delimiter='\t', header=None)
-
-#         # Encode categorical features
-#         objects = data.select_dtypes(include=['object'])
-#         for col in objects.columns:
-#             if col != data.shape[1] - 1:
-#                 data.iloc[:, col] = LabelEncoder().fit_transform(data.iloc[:, col])
-
-#         X, y = data.iloc[:, :-1].values, data.iloc[:, -1].values
-#         DATASETS[name] = {'data': [X, y], 'extra': {}}
-#     except Exception as e:
-#         print(f"Error loading {name}: {e}")
-
-
+# Yeast
 data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat', header=None)
 data.iloc[:, -1] = data.iloc[:, -1].map({'negative': 0, 'positive': 1})
 data.iloc[:, -1] = data.iloc[:, -1].astype(int)
-
 DATASETS.update({
     'Yeast5': {
         'data': [data.values[:, :-1], data.values[:, -1]],
@@ -92,6 +72,8 @@ def main():
         print(f"Processing {dataset_name}...")
         X, y = dataset['data']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train = X_train.astype(int)
+        X_test = X_test.astype(int)
         y_train = y_train.astype(int)
         y_test = y_test.astype(int)
         # print("Before OverSampling:", np.bincount(y_train))
@@ -99,28 +81,31 @@ def main():
         # print("After OverSampling:", np.bincount(y_train_SMOTE))
         
         X_oversampled = torch.tensor(X_train_SMOTE[len(X_train):], dtype=torch.float32).to(device)
-        
         lr, epochs, batch_size = 0.0002, 150, 128
-        generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE, X_train, y_train, X_oversampled, device, lr, epochs, batch_size, 1, 0)
         
+        start_time_sg = time.time()
+        generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE, X_train, y_train, X_oversampled, device, lr, epochs, batch_size, 1, 0) 
         X_trained_SG = generator_SG(X_oversampled).cpu().detach().numpy()
-        X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()
-        
         X_final_SG, y_final_SG = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_SG)), y_train_SMOTE)
-        X_final_G, y_final_G = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)), y_train_SMOTE)
-        
-        metrics = {
-            # "Normal": test_model_lists(X_train, y_train, X_test, y_test, 20),
-            # "SMOTE": test_model_lists(X_train_SMOTE, y_train_SMOTE, X_test, y_test, 20),
-            "SG_GANs": test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 20),
-            "G_GANs": test_model_lists(X_final_G, y_final_G, X_test, y_test, 20)
+        metrics = {   
+            "SG_GANs": test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 20)
         }
+        sg_time_taken = time.time() - start_time_sg
+
+        start_time_g = time.time()
+        generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE, X_train, y_train, X_oversampled, device, lr, epochs, batch_size, 1, 0) 
+        X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()   
+        X_final_G, y_final_G = shuffle_in_unison(np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)), y_train_SMOTE)
+        metrics["G_GANs"]= test_model_lists(X_final_G, y_final_G, X_test, y_test, 20) 
+        g_time_taken = time.time() - start_time_g
         
         output_path = os.path.join(output_dir, f"{dataset_name}_results.txt")
         with open(output_path, "w") as f:
-            for model, (test_acc, train_acc, f1_score,ap_score,gmean_score,auc_score) in metrics.items():
-                result = f"{model} - Test Acc: {np.mean(test_acc)}, AUC: {np.mean(auc_score)}, F1: {np.mean(f1_score)}, AP: {np.mean(ap_score)}, GMEAN: {np.mean(gmean_score)}\n"
+            for model, (test_acc, train_acc, f1_score,ap_score,gmean_score,auc_score,std_dev_acc, std_dev_f1,std_dev_ap,std_dev_gmean,std_dev_auc) in metrics.items():
+                result = f"{model} - Test Acc: {np.mean(test_acc)} '±' {std_dev_acc} , AUC: {np.mean(auc_score)}  '±' {std_dev_auc}, F1: {np.mean(f1_score)}  '±' {std_dev_f1}, AP: {np.mean(ap_score)}  '±' {std_dev_ap}, GMEAN: {np.mean(gmean_score)}  '±' {std_dev_gmean}\n"
                 print(result)
+                print(f"SG_GANs Time Taken: {sg_time_taken:.2f} seconds")
+                print(f"G_GANs Time Taken: {g_time_taken:.2f} seconds")
                 f.write(result)
 
 if __name__ == "__main__":
