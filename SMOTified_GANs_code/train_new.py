@@ -45,16 +45,155 @@ DATASETS = dict()
 #     # 'Credit Card Default': '/content/GANclassimbalanced/SMOTified_GANs_code/raw/default of credit card clients.xls'
 # }
 
-# Yeast
-data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat', header=None)
-data.iloc[:, -1] = data.iloc[:, -1].map({'negative': 0, 'positive': 1})
-data.iloc[:, -1] = data.iloc[:, -1].astype(int)
-DATASETS.update({
-    'Yeast5': {
-        'data': [data.values[:, :-1], data.values[:, -1]],
-        'extra': {}
-    }
-})
+# # Yeast
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/yeast5.dat', header=None)
+# data.iloc[:, -1] = data.iloc[:, -1].map({'negative': 0, 'positive': 1})
+# data.iloc[:, -1] = data.iloc[:, -1].astype(int)
+# DATASETS.update({
+#     'Yeast5': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {}
+#     }
+# })
+
+# """Flare-F"""
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/flare-F.dat', header=None)
+# objects = data.select_dtypes(include=['object'])
+# for col in objects.columns:
+#     if col == len(data.columns) - 1:
+#         continue
+#     data.iloc[:, col] = LabelEncoder().fit_transform(data.values[:, col])
+# data.iloc[:, -1] = LabelEncoder().fit_transform(data.values[:, -1])
+# DATASETS.update({
+#     'Flare-F': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {
+
+#         }
+#     }
+# })
+
+
+# # """Car vGood"""
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/car.data', header=None)
+# DATASETS.update({
+#     'CarvGood': {
+#         'data': [
+#             OrdinalEncoder().fit_transform(data.values[:, :-1]),
+#             LabelEncoder().fit_transform(data.values[:, -1])
+#         ],
+#         'extra': {
+#             'minority_class': 'vgood'
+#         }
+#     }
+# })
+
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/seeds_dataset.txt', header=None)
+# DATASETS.update({
+#     'Seed': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {
+#             'minority_class': 2
+#         }
+#     }
+# })
+
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/glass.csv', header=None)
+
+# DATASETS.update({
+#     'Glass': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {
+#             'minority_class': 7
+#         }
+#     }
+# })
+
+
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/Indian Liver Patient Dataset (ILPD).csv', header=None)
+
+
+# #Encode
+# data.iloc[:, 1] = LabelEncoder().fit_transform(data.values[:, 1])
+# data.fillna(data.mean(), inplace=True)
+# DATASETS.update({
+#     'ILPD': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {}
+#     }
+# })
+
+
+# # Load the Epileptic Seizure Recognition dataset
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/seizure.csv', header=0, low_memory=False)
+
+# DATASETS.update({
+#     'Epileptic Seizure Recognition': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {}
+#     }
+# })
+
+
+
+# # Load the breast cancer dataset
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/breast_cancer.csv', header=None)
+
+# # Encode categorical features if necessary
+# # objects = data.select_dtypes(include=['object'])
+# # for col in objects.columns:
+# #     if col == data.shape[1] - 1:  # Skip the last column if it's the target
+# #         continue
+# #     data.iloc[:, col] = LabelEncoder().fit_transform(data.iloc[:, col])
+# data.iloc[:, -1] = LabelEncoder().fit_transform(data.iloc[:, -1])
+# # Update the DATASETS dictionary
+# DATASETS.update({
+#     'Breast Cancer Wisconsin': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],  # Features and target
+#         'extra': {
+
+#         }
+#     }
+# })
+
+
+
+# '''Diabetes'''
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/diabetes_data.csv', header=0)
+# data.iloc[:,:-1]=OrdinalEncoder().fit_transform(data.iloc[:, :-1])
+# data.iloc[:, -1] = LabelEncoder().fit_transform(data.iloc[:, -1])
+# data.fillna(data.mean(), inplace=True)
+
+# DATASETS.update({
+#     'Diabetes': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {}
+#     }
+# })
+
+
+
+# '''sonar'''
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/sonar_all_data.csv', header=None)
+
+# DATASETS.update({
+#     'Sonar': {
+#         'data': [data.values[:, :-1], LabelEncoder().fit_transform(data.values[:, -1])],
+#         'extra': {}
+#     }
+# })
+
+
+# '''student_dropout'''
+# data = pd.read_csv('/content/GANclassimbalanced/SMOTified_GANs_code/raw/student_dropout.csv', header=0)
+
+# DATASETS.update({
+#     'studen': {
+#         'data': [data.values[:, :-1], data.values[:, -1]],
+#         'extra': {}
+#     }
+# })
+
 
 # Function to shuffle data
 def shuffle_in_unison(a, b):
@@ -72,10 +211,14 @@ def main():
         print(f"Processing {dataset_name}...")
         X, y = dataset['data']
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        X_train = X_train.astype(int)
-        X_test = X_test.astype(int)
-        y_train = y_train.astype(int)
-        y_test = y_test.astype(int)
+        y_train = y_train - 1
+        y_test = y_test - 1
+        # y_train = np.where(y_train >= 4, y_train - 1, y_train)  # Only modify values 4,5,6
+        # y_test = np.where(y_test >= 4, y_test - 1, y_test)      # Keep 0,1,2 unchanged
+        X_train = X_train.astype(float)
+        X_test = X_test.astype(float)
+        y_train = y_train.astype(float)
+        y_test = y_test.astype(float)
         # print("Before OverSampling:", np.bincount(y_train))
         X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
         # print("After OverSampling:", np.bincount(y_train_SMOTE))
@@ -102,7 +245,7 @@ def main():
         output_path = os.path.join(output_dir, f"{dataset_name}_results.txt")
         with open(output_path, "w") as f:
             for model, (test_acc, train_acc, f1_score,ap_score,gmean_score,auc_score,std_dev_acc, std_dev_f1,std_dev_ap,std_dev_gmean,std_dev_auc) in metrics.items():
-                result = f"{model} - Test Acc: {np.mean(test_acc)} '±' {std_dev_acc} , AUC: {np.mean(auc_score)}  '±' {std_dev_auc}, F1: {np.mean(f1_score)}  '±' {std_dev_f1}, AP: {np.mean(ap_score)}  '±' {std_dev_ap}, GMEAN: {np.mean(gmean_score)}  '±' {std_dev_gmean}\n"
+                result = f"{model} - Test Acc: {np.mean(test_acc):.4f} ± {std_dev_acc:.4f} , AUC: {np.mean(auc_score):.4f} ± {std_dev_auc:.4f}, F1: {np.mean(f1_score):.4f} ± {std_dev_f1:.4f}, AP: {np.mean(ap_score):.4f} ± {std_dev_ap:.4f}, GMEAN: {np.mean(gmean_score):.4f} ± {std_dev_gmean:.4f}\n"
                 print(result)
                 print(f"SG_GANs Time Taken: {sg_time_taken:.2f} seconds")
                 print(f"G_GANs Time Taken: {g_time_taken:.2f} seconds")
