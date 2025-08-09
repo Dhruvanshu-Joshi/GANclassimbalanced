@@ -1,0 +1,3 @@
+Students' Dropout and Academic Success & Social Science & UCI Machine Learning Repository & 36 & 3 & 4424 & Dropout (1421) , Graduate (2209) , Enrolled (794) & Enrolled & 794 & 2209
+
+Citation: V. Realinho, M. Vieira Martins, J. Machado, and L. Baptista. "Predict Students' Dropout and Academic Success," UCI Machine Learning Repository, 2021. [Online]. Available: https://doi.org/10.24432/C5MC89.

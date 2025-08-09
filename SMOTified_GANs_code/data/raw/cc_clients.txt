@@ -1,0 +1,1 @@
+Default of Credit Card Clients & Business & UCI Machine Learning Repository & 23 & 2 & 30000 & Yes (6636), No (23364) & Yes & 6636 & 23364 
