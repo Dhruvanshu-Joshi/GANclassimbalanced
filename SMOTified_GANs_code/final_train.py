@@ -144,17 +144,17 @@ DATASETS.update({
     }
 })
 
-"""Yeast5-ERL"""
-data = pd.read_csv('data/raw/yeast5.data', header=None)
-DATASETS.update({
-    'Yeast5-ERL': {
-        'data': [data.values[:, 1:-1], data.values[:, -1]],
-        'extra': {
-            # 'minority_class': 'ME1'
-            'minority_class': 'ERL'
-        }
-    }
-})
+# """Yeast5-ERL"""
+# data = pd.read_csv('data/raw/yeast5.data', header=None)
+# DATASETS.update({
+#     'Yeast5-ERL': {
+#         'data': [data.values[:, 1:-1], data.values[:, -1]],
+#         'extra': {
+#             # 'minority_class': 'ME1'
+#             'minority_class': 'ERL'
+#         }
+#     }
+# })
 
 # Load the Epileptic Seizure Recognition dataset
 data = pd.read_csv('data/raw/seizure.csv', header=0, low_memory=False)
