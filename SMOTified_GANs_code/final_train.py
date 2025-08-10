@@ -358,15 +358,23 @@ def shuffle_in_unison(a, b):
     permutation = np.random.permutation(len(a))
     return a[permutation], b[permutation]
 
-def clean_data(X, y):
+def log_nans(label, arr):
+    """Log if NaNs or Infs are detected."""
+    if np.isnan(arr).any() or np.isinf(arr).any():
+        print(f"[WARNING] {label} contains NaN/Inf values!")
+        print(f"  NaN count: {np.isnan(arr).sum()} | Inf count: {np.isinf(arr).sum()}")
+
+def clean_data(X, y, label_X="", label_y=""):
     """Replace NaNs and Infs in features and labels."""
+    log_nans(label_X, X)
+    log_nans(label_y, y)
     X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
     y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
     return X.astype(float), y.astype(float)
 
 # ---------------- Main Training Loop ---------------- #
 def main():
-    device = get_default_device()  # Your function for CUDA/CPU
+    device = get_default_device()
     output_dir = "results"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -377,7 +385,7 @@ def main():
         print(f"Processing {dataset_name}...")
         X, y = dataset['data']
         y = y - 1  # Adjust labels if required
-        X, y = clean_data(X, y)  # Initial cleaning
+        X, y = clean_data(X, y, "Initial X", "Initial y")
 
         excel_rows = []  # Store per-run per-fold metrics
 
@@ -388,13 +396,14 @@ def main():
                 X_train, X_test = X[train_idx], X[test_idx]
                 y_train, y_test = y[train_idx], y[test_idx]
 
-                # Clean before resampling
-                X_train, y_train = clean_data(X_train, y_train)
-                X_test, y_test = clean_data(X_test, y_test)
+                X_train, y_train = clean_data(X_train, y_train, "X_train", "y_train")
+                X_test, y_test = clean_data(X_test, y_test, "X_test", "y_test")
 
                 # SMOTE oversampling
                 X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
-                X_train_SMOTE, y_train_SMOTE = clean_data(X_train_SMOTE, y_train_SMOTE)
+                X_train_SMOTE, y_train_SMOTE = clean_data(
+                    X_train_SMOTE, y_train_SMOTE, "X_train_SMOTE", "y_train_SMOTE"
+                )
 
                 X_oversampled = torch.tensor(
                     X_train_SMOTE[len(X_train):], dtype=torch.float32
@@ -413,15 +422,13 @@ def main():
                 )
 
                 X_trained_SG = generator_SG(X_oversampled).cpu().detach().numpy()
-                X_trained_SG, _ = clean_data(X_trained_SG, y_train_SMOTE[len(X_train):])
+                X_trained_SG, _ = clean_data(X_trained_SG, y_train_SMOTE[len(X_train):], "X_trained_SG", "y_extra_SG")
 
                 X_final_SG, y_final_SG = shuffle_in_unison(
                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_SG)),
                     y_train_SMOTE
                 )
-                X_final_SG, y_final_SG = clean_data(X_final_SG, y_final_SG)
-
-                X_test, y_test = clean_data(X_test, y_test)
+                X_final_SG, y_final_SG = clean_data(X_final_SG, y_final_SG, "X_final_SG", "y_final_SG")
 
                 test_acc, train_acc, f1_s, ap_s, gmean_s, auc_s, \
                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
@@ -453,15 +460,13 @@ def main():
                 )
 
                 X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()
-                X_trained_G, _ = clean_data(X_trained_G, y_train_SMOTE[len(X_train):])
+                X_trained_G, _ = clean_data(X_trained_G, y_train_SMOTE[len(X_train):], "X_trained_G", "y_extra_G")
 
                 X_final_G, y_final_G = shuffle_in_unison(
                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)),
                     y_train_SMOTE
                 )
-                X_final_G, y_final_G = clean_data(X_final_G, y_final_G)
-
-                X_test, y_test = clean_data(X_test, y_test)
+                X_final_G, y_final_G = clean_data(X_final_G, y_final_G, "X_final_G", "y_final_G")
 
                 test_acc, train_acc, f1_s, ap_s, gmean_s, auc_s, \
                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
