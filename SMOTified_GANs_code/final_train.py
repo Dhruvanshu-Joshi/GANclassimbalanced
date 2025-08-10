@@ -172,15 +172,19 @@ DATASETS.update({
 '''Diabetes'''
 data = pd.read_csv('data/raw/diabetes_data.csv', header=0)
 # Loop through columns
+# Step 1: Convert 'Male'/'Female' to 1/0 where applicable
 for col in data.columns:
-    # Get unique non-null values
     unique_vals = set(data[col].dropna().unique())
-    
-    # Check if the column is purely Male/Female
     if unique_vals <= {"Male", "Female"}:
-        data[col] = data[col].map({"Yes": 1, "No": 0})
-# data.fillna(data.mean(), inplace=True)
-data.fillna(data.mean(), inplace=True)
+        data[col] = data[col].map({"Male": 1, "Female": 0})
+
+# Step 2: One-hot encode all remaining object/string columns
+categorical_cols = data.select_dtypes(include=['object']).columns
+if len(categorical_cols) > 0:
+    data = pd.get_dummies(data, columns=categorical_cols, drop_first=True)
+
+# Step 3: Fill missing numeric values with column means
+data.fillna(data.mean(numeric_only=True), inplace=True)
 
 DATASETS.update({
     'Diabetes': {
