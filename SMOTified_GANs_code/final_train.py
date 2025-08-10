@@ -245,14 +245,128 @@ DATASETS.update({
     }
 })
 
-# Function to shuffle data
+# # Function to shuffle data
+# def shuffle_in_unison(a, b):
+#     assert len(a) == len(b)
+#     permutation = np.random.permutation(len(a))
+#     return a[permutation], b[permutation]
+
+# def main():
+#     device = get_default_device()
+#     output_dir = "results"
+#     os.makedirs(output_dir, exist_ok=True)
+
+#     n_runs = 20
+#     k_folds = 5
+
+#     for dataset_name, dataset in DATASETS.items():
+#         print(f"Processing {dataset_name}...")
+#         X, y = dataset['data']
+#         y = y - 1  # Adjust labels if required
+#         X = X.astype(float)
+#         y = y.astype(float)
+
+#         excel_rows = []  # to store per-run per-fold metrics
+
+#         for run in range(n_runs):
+#             kf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=run)
+
+#             for fold, (train_idx, test_idx) in enumerate(kf.split(X, y)):
+#                 X_train, X_test = X[train_idx], X[test_idx]
+#                 y_train, y_test = y[train_idx], y[test_idx]
+
+#                 # SMOTE oversampling
+#                 X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
+#                 X_oversampled = torch.tensor(X_train_SMOTE[len(X_train):], dtype=torch.float32).to(device)
+
+#                 lr, epochs, batch_size = 0.0002, 150, 128
+
+#                 # ---- SG_GANs ----
+#                 start_time_sg = time.time()
+#                 generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE,
+#                                                X_train, y_train, X_oversampled,
+#                                                device, lr, epochs, batch_size, 1, 0)
+
+#                 X_trained_SG = generator_SG(X_oversampled).cpu().detach().numpy()
+#                 X_final_SG, y_final_SG = shuffle_in_unison(
+#                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_SG)),
+#                     y_train_SMOTE
+#                 )
+
+#                 test_acc, train_acc, f1_score, ap_score, gmean_score, auc_score, \
+#                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
+#                     test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 1)  # 1 run here
+
+#                 sg_time_taken = time.time() - start_time_sg
+
+#                 excel_rows.append({
+#                     "Dataset": dataset_name,
+#                     "Run": run + 1,
+#                     "Fold": fold + 1,
+#                     "Method": "SG_GANs",
+#                     "Accuracy": np.mean(test_acc),
+#                     "AUC": np.mean(auc_score),
+#                     "F1": np.mean(f1_score),
+#                     "AP": np.mean(ap_score),
+#                     "GMean": np.mean(gmean_score),
+#                     "TimeTaken": sg_time_taken
+#                 })
+
+#                 # ---- G_GANs ----
+#                 start_time_g = time.time()
+#                 generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE,
+#                                                X_train, y_train, X_oversampled,
+#                                                device, lr, epochs, batch_size, 1, 0)
+
+#                 X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()
+#                 X_final_G, y_final_G = shuffle_in_unison(
+#                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)),
+#                     y_train_SMOTE
+#                 )
+
+#                 test_acc, train_acc, f1_score, ap_score, gmean_score, auc_score, \
+#                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
+#                     test_model_lists(X_final_G, y_final_G, X_test, y_test, 1)
+
+#                 g_time_taken = time.time() - start_time_g
+
+#                 excel_rows.append({
+#                     "Dataset": dataset_name,
+#                     "Run": run + 1,
+#                     "Fold": fold + 1,
+#                     "Method": "G_GANs",
+#                     "Accuracy": np.mean(test_acc),
+#                     "AUC": np.mean(auc_score),
+#                     "F1": np.mean(f1_score),
+#                     "AP": np.mean(ap_score),
+#                     "GMean": np.mean(gmean_score),
+#                     "TimeTaken": g_time_taken
+#                 })
+
+#         # Save per-run results for this dataset
+#         df_results = pd.DataFrame(excel_rows)
+#         df_results.to_excel(os.path.join(output_dir, f"results_{dataset_name}.xlsx"), index=False)
+#         print(f"Saved detailed results for {dataset_name} to Excel.")
+
+# if __name__ == "__main__":
+#     main()
+
+# ---------------- Utility Functions ---------------- #
 def shuffle_in_unison(a, b):
+    """Shuffle two arrays in the same order."""
     assert len(a) == len(b)
     permutation = np.random.permutation(len(a))
     return a[permutation], b[permutation]
 
+def clean_data(X, y):
+    """Replace NaNs and Infs in features and labels."""
+    X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)
+    y = np.nan_to_num(y, nan=0.0, posinf=0.0, neginf=0.0)
+    return X.astype(float), y.astype(float)
+
+# ---------------- Main Training Loop ---------------- #
 def main():
-    device = get_default_device()
+    device = get_default_device()  # Your function for CUDA/CPU
     output_dir = "results"
     os.makedirs(output_dir, exist_ok=True)
 
@@ -263,10 +377,9 @@ def main():
         print(f"Processing {dataset_name}...")
         X, y = dataset['data']
         y = y - 1  # Adjust labels if required
-        X = X.astype(float)
-        y = y.astype(float)
+        X, y = clean_data(X, y)  # Initial cleaning
 
-        excel_rows = []  # to store per-run per-fold metrics
+        excel_rows = []  # Store per-run per-fold metrics
 
         for run in range(n_runs):
             kf = StratifiedKFold(n_splits=k_folds, shuffle=True, random_state=run)
@@ -275,27 +388,44 @@ def main():
                 X_train, X_test = X[train_idx], X[test_idx]
                 y_train, y_test = y[train_idx], y[test_idx]
 
+                # Clean before resampling
+                X_train, y_train = clean_data(X_train, y_train)
+                X_test, y_test = clean_data(X_test, y_test)
+
                 # SMOTE oversampling
                 X_train_SMOTE, y_train_SMOTE = SMOTE().fit_resample(X_train, y_train)
-                X_oversampled = torch.tensor(X_train_SMOTE[len(X_train):], dtype=torch.float32).to(device)
+                X_train_SMOTE, y_train_SMOTE = clean_data(X_train_SMOTE, y_train_SMOTE)
+
+                X_oversampled = torch.tensor(
+                    X_train_SMOTE[len(X_train):], dtype=torch.float32
+                ).to(device)
 
                 lr, epochs, batch_size = 0.0002, 150, 128
 
                 # ---- SG_GANs ----
                 start_time_sg = time.time()
-                generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE,
-                                               X_train, y_train, X_oversampled,
-                                               device, lr, epochs, batch_size, 1, 0)
+                generator_SG, generator_G = f1(
+                    X_train, y_train,
+                    X_train_SMOTE, y_train_SMOTE,
+                    X_train, y_train,
+                    X_oversampled,
+                    device, lr, epochs, batch_size, 1, 0
+                )
 
                 X_trained_SG = generator_SG(X_oversampled).cpu().detach().numpy()
+                X_trained_SG, _ = clean_data(X_trained_SG, y_train_SMOTE[len(X_train):])
+
                 X_final_SG, y_final_SG = shuffle_in_unison(
                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_SG)),
                     y_train_SMOTE
                 )
+                X_final_SG, y_final_SG = clean_data(X_final_SG, y_final_SG)
 
-                test_acc, train_acc, f1_score, ap_score, gmean_score, auc_score, \
+                X_test, y_test = clean_data(X_test, y_test)
+
+                test_acc, train_acc, f1_s, ap_s, gmean_s, auc_s, \
                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
-                    test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 1)  # 1 run here
+                    test_model_lists(X_final_SG, y_final_SG, X_test, y_test, 1)
 
                 sg_time_taken = time.time() - start_time_sg
 
@@ -305,26 +435,35 @@ def main():
                     "Fold": fold + 1,
                     "Method": "SG_GANs",
                     "Accuracy": np.mean(test_acc),
-                    "AUC": np.mean(auc_score),
-                    "F1": np.mean(f1_score),
-                    "AP": np.mean(ap_score),
-                    "GMean": np.mean(gmean_score),
+                    "AUC": np.mean(auc_s),
+                    "F1": np.mean(f1_s),
+                    "AP": np.mean(ap_s),
+                    "GMean": np.mean(gmean_s),
                     "TimeTaken": sg_time_taken
                 })
 
                 # ---- G_GANs ----
                 start_time_g = time.time()
-                generator_SG, generator_G = f1(X_train, y_train, X_train_SMOTE, y_train_SMOTE,
-                                               X_train, y_train, X_oversampled,
-                                               device, lr, epochs, batch_size, 1, 0)
+                generator_SG, generator_G = f1(
+                    X_train, y_train,
+                    X_train_SMOTE, y_train_SMOTE,
+                    X_train, y_train,
+                    X_oversampled,
+                    device, lr, epochs, batch_size, 1, 0
+                )
 
                 X_trained_G = generator_G(torch.randn_like(X_oversampled)).cpu().detach().numpy()
+                X_trained_G, _ = clean_data(X_trained_G, y_train_SMOTE[len(X_train):])
+
                 X_final_G, y_final_G = shuffle_in_unison(
                     np.vstack((X_train_SMOTE[:len(X_train)], X_trained_G)),
                     y_train_SMOTE
                 )
+                X_final_G, y_final_G = clean_data(X_final_G, y_final_G)
 
-                test_acc, train_acc, f1_score, ap_score, gmean_score, auc_score, \
+                X_test, y_test = clean_data(X_test, y_test)
+
+                test_acc, train_acc, f1_s, ap_s, gmean_s, auc_s, \
                 std_dev_acc, std_dev_f1, std_dev_ap, std_dev_gmean, std_dev_auc = \
                     test_model_lists(X_final_G, y_final_G, X_test, y_test, 1)
 
@@ -336,10 +475,10 @@ def main():
                     "Fold": fold + 1,
                     "Method": "G_GANs",
                     "Accuracy": np.mean(test_acc),
-                    "AUC": np.mean(auc_score),
-                    "F1": np.mean(f1_score),
-                    "AP": np.mean(ap_score),
-                    "GMean": np.mean(gmean_score),
+                    "AUC": np.mean(auc_s),
+                    "F1": np.mean(f1_s),
+                    "AP": np.mean(ap_s),
+                    "GMean": np.mean(gmean_s),
                     "TimeTaken": g_time_taken
                 })
 
