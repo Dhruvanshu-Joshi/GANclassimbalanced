@@ -105,7 +105,14 @@ DATASETS.update({
 
 """ILPD"""
 data = pd.read_csv('data/raw/Indian Liver Patient Dataset (ILPD).csv', header=None)
-data.replace({'Male': 1, 'Female': 0}, inplace=True)
+# Loop through columns
+for col in data.columns:
+    # Get unique non-null values
+    unique_vals = set(data[col].dropna().unique())
+    
+    # Check if the column is purely Male/Female
+    if unique_vals <= {"Male", "Female"}:
+        data[col] = data[col].map({"Male": 1, "Female": 0})
 data.fillna(data.mean(), inplace=True)
 
 #Encode
