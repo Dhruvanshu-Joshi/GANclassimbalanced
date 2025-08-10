@@ -178,7 +178,7 @@ for col in data.columns:
     
     # Check if the column is purely Male/Female
     if unique_vals <= {"Male", "Female"}:
-        data[col] = data[col].map({"Male": 1, "Female": 0})
+        data[col] = data[col].map({"Yes": 1, "No": 0})
 # data.fillna(data.mean(), inplace=True)
 data.fillna(data.mean(), inplace=True)
 
