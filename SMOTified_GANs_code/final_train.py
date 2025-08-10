@@ -171,7 +171,15 @@ DATASETS.update({
 
 '''Diabetes'''
 data = pd.read_csv('data/raw/diabetes_data.csv', header=0)
-
+# Loop through columns
+for col in data.columns:
+    # Get unique non-null values
+    unique_vals = set(data[col].dropna().unique())
+    
+    # Check if the column is purely Male/Female
+    if unique_vals <= {"Male", "Female"}:
+        data[col] = data[col].map({"Male": 1, "Female": 0})
+# data.fillna(data.mean(), inplace=True)
 data.fillna(data.mean(), inplace=True)
 
 DATASETS.update({
