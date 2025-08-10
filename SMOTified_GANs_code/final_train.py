@@ -11,6 +11,25 @@ from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
 from sklearn.model_selection import StratifiedKFold
 from tqdm import tqdm
 import numpy as np
+import pandas as pd
+import numpy as np
+import torch
+from tqdm.auto import tqdm
+from sklearn.model_selection import train_test_split
+from imblearn.over_sampling import SMOTE
+from torch.utils.data import DataLoader, TensorDataset
+from dataset_loader import load_dataset
+from GANs_model import GANs_Discriminator, GANs_Generator
+from model_trainer import train_discriminator, train_generator
+from model_fit import SG_fit, G_fit
+from test_model import test_model, test_model_lists
+from choose_device import get_default_device, to_device
+from fit import f1
+from sklearn.preprocessing import OrdinalEncoder, LabelEncoder
+from sklearn.datasets import load_wine
+# from real_data_generator import get_real_data_for_GAN  # Import the function
+import os
+import time
 
 # Keep your imports from original code
 
