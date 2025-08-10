@@ -245,6 +245,12 @@ DATASETS.update({
     }
 })
 
+# Function to shuffle data
+def shuffle_in_unison(a, b):
+    assert len(a) == len(b)
+    permutation = np.random.permutation(len(a))
+    return a[permutation], b[permutation]
+
 def main():
     device = get_default_device()
     output_dir = "results"
